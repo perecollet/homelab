@@ -1,0 +1,19 @@
+# files/compose.yaml — FileBrowser
+# Provides a clean web UI to browse/upload/download files.
+# Default login: admin / admin  ← change immediately after first boot!
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    container_name: filebrowser
+    restart: unless-stopped
+    volumes:
+      - /srv/files:/srv                        # Host folder exposed in the UI
+      - /srv/filebrowser/database:/database    # DB persisted directly on host
+      - ./filebrowser.json:/.filebrowser.json:ro
+    networks:
+      - proxy-nw
+    # No direct port exposure — access goes through Caddy
+
+networks:
+  proxy-nw:
+    external: true

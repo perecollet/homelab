@@ -1,0 +1,29 @@
+# cloudflared/compose.yaml — Cloudflare Tunnel
+# The tunnel punches through your router/firewall — no port forwarding needed.
+#
+# Setup (one-time):
+#   1. Log in:        docker run --rm -it cloudflare/cloudflared tunnel login
+#   2. Create tunnel: docker run --rm -it cloudflare/cloudflared tunnel create homelab
+#   3. Copy your Tunnel Token from the Cloudflare dashboard into .env
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    env_file:
+      - ../.env
+    environment:
+      TUNNEL_TOKEN: ${CF_TUNNEL_TOKEN}
+    volumes:
+      - cloudflared-config:/etc/cloudflared
+    networks:
+      - proxy-nw
+
+volumes:
+  cloudflared-config:
+
+networks:
+  proxy-nw:
+    external: true

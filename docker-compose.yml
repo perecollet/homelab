@@ -1,0 +1,16 @@
+name: perecollet-homelab
+
+# This pulls in the configuration from every sub-folder
+include:
+  - path: ./ads/compose.yaml
+  - path: ./caddy/compose.yaml
+  - path: ./cloudflared/compose.yaml
+  - path: ./files/compose.yaml
+  - path: ./photos/compose.yaml
+  - path: ./portfolio/compose.yaml
+
+networks:
+  # This is the "internal highway" for all your apps
+  proxy-nw:
+    name: proxy-nw
+    driver: bridge

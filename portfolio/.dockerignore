@@ -1,0 +1,5 @@
+perecolletsite/node_modules/
+perecolletsite/dist/
+perecolletsite/.git/
+perecolletsite/.env
+perecolletsite/*.local

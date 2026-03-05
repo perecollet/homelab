@@ -1,0 +1,11 @@
+services:
+  portfolio:
+    build: .
+    container_name: portfolio_site
+    restart: unless-stopped
+    networks:
+      - proxy-nw
+
+networks:
+  proxy-nw:
+    external: true

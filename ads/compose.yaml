@@ -1,0 +1,20 @@
+# ads/compose.yaml — AdGuard Home (DNS-level ad blocking, LAN only)
+services:
+  adguard:
+    image: adguard/adguardhome:latest
+    container_name: adguard
+    restart: unless-stopped
+    ports:
+      - "53:53/tcp"       # DNS
+      - "53:53/udp"       # DNS
+      - "3000:3000/tcp"   # Setup wizard — remove this after first boot
+      - "8080:80/tcp"     # Admin UI — http://YOUR-SERVER-IP:8080
+    volumes:
+      - /srv/adguard/work:/opt/adguardhome/work
+      - /srv/adguard/conf:/opt/adguardhome/conf
+    networks:
+      - proxy-nw
+
+networks:
+  proxy-nw:
+    external: true
