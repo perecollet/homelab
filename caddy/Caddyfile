@@ -5,7 +5,7 @@
 
 # --- Internal HTTP listener for Cloudflare Tunnel (no redirect) ---
 :2080 {
-    @portfolio host portfolio.perecollet.dev
+    @portfolio host perecollet.dev
     handle @portfolio {
         reverse_proxy portfolio_site:80
     }
@@ -28,7 +28,7 @@
 
 # --- HTTPS (LAN access) ---
 
-portfolio.perecollet.dev {
+perecollet.dev {
     reverse_proxy portfolio_site:80
 }
 
