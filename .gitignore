@@ -1,0 +1,32 @@
+# --- PRIVATE SECRETS ---
+.env
+*.env
+secrets/
+
+# --- BULK DATA (The "Heavies") ---
+# Ignore the actual photo library and database files
+photos/library/
+photos/postgres/
+photos/thumbs/
+files/storage/
+ads/work/
+ads/conf/
+
+# --- APP RUNTIME ---
+# Generic data/config folders inside any sub-project
+**/data/
+**/config/
+**/logs/
+**/*.db
+**/*.db-journal
+
+# --- SYSTEM JUNK ---
+.DS_Store
+Thumbs.db
+node_modules/
+.idea/
+.vscode/
+
+# --- CADDY INTERNAL ---
+caddy/data/
+caddy/config/
