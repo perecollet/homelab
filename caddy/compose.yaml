@@ -9,6 +9,8 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
+    ports:
+      - "2080:2080"
     networks:
       - proxy-nw
 

@@ -1,38 +1,45 @@
-
 {
-    # Global options
     email your-email@example.com
-    
-    # This enables the DNS-01 challenge so Caddy can get certificates 
-    # even if your server is hidden behind a Cloudflare Tunnel.
     acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 }
 
-# --- Subdomains ---
+# --- Internal HTTP listener for Cloudflare Tunnel (no redirect) ---
+:2080 {
+    @portfolio host portfolio.perecollet.dev
+    handle @portfolio {
+        reverse_proxy portfolio_site:80
+    }
 
-# 1. Portfolio (Java / Docusaurus)
-portfolio.perecollet.dev {
-    reverse_proxy portfolio_site:3000
+    @photos host photos.perecollet.dev
+    handle @photos {
+        reverse_proxy immich_server:2283
+    }
+
+    @files host files.perecollet.dev
+    handle @files {
+        reverse_proxy filebrowser:80
+    }
+
+    @ads host ads.perecollet.dev
+    handle @ads {
+        reverse_proxy adguard:80
+    }
 }
 
-# 2. Photos (Immich)
+# --- HTTPS (LAN access) ---
+
+portfolio.perecollet.dev {
+    reverse_proxy portfolio_site:80
+}
+
 photos.perecollet.dev {
     reverse_proxy immich_server:2283
 }
 
-# 3. Files (File Browser)
 files.perecollet.dev {
     reverse_proxy filebrowser:80
 }
 
-# 4. Ads (AdGuard Home Admin)
-# Note: During first-time setup, temporarily change this to adguard:3000 and
-# expose "3000:3000/tcp" in ads/compose.yaml. After setup, revert to port 80.
 ads.perecollet.dev {
     reverse_proxy adguard:80
 }
-
-# 5. Optional: Root Domain redirect or landing page
-# perecollet.dev {
-#     redir https://portfolio.perecollet.dev
-# }
