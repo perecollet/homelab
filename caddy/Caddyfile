@@ -36,5 +36,7 @@ files.perecollet.dev {
 }
 
 ads.perecollet.dev {
-    reverse_proxy adguard:80
+    reverse_proxy adguard:80 {
+        header_up Host {host}
+    }
 }
