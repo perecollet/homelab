@@ -20,10 +20,6 @@
         reverse_proxy filebrowser:80
     }
 
-    @ads host ads.perecollet.dev
-    handle @ads {
-        reverse_proxy adguard:80
-    }
 }
 
 # --- HTTPS (LAN access) ---
