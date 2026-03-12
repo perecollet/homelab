@@ -3,8 +3,8 @@ services:
     build: .
     container_name: caddy
     restart: unless-stopped
-    environment:
-      - CLOUDFLARE_API_TOKEN=${CF_TOKEN}
+    env_file:
+      - ../.env
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
