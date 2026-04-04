@@ -20,6 +20,9 @@ services:
       - cloudflared-config:/etc/cloudflared
     networks:
       - proxy-nw
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
 
 volumes:
   cloudflared-config:
