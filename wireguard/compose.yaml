@@ -28,8 +28,8 @@ services:
     image: favonia/cloudflare-ddns:latest
     container_name: cloudflare-ddns
     restart: unless-stopped
-    network_mode: host
     environment:
       - CF_API_TOKEN=${CF_API_TOKEN}
       - DOMAINS=vpn.perecollet.dev
       - PROXIED=false
+      - IP6_PROVIDER=none
