@@ -9,7 +9,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Madrid
-      - SERVERURL=perecollet.dev
+      - SERVERURL=vpn.perecollet.dev
       - SERVERPORT=51820
       - PEERS=iphone,mac
       - PEERDNS=192.168.1.62
