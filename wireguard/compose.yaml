@@ -31,7 +31,7 @@ services:
     dns:
       - 1.1.1.1
     environment:
-      - CF_API_TOKEN=${CF_API_TOKEN}
+      - CLOUDFLARE_API_TOKEN=${CF_API_TOKEN}
       - DOMAINS=vpn.perecollet.dev
       - PROXIED=false
       - IP6_PROVIDER=none
