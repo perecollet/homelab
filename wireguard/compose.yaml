@@ -30,8 +30,6 @@ services:
     restart: unless-stopped
     dns:
       - 1.1.1.1
-    env_file:
-      - ../.env
     environment:
       - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_DDNS_TOKEN}
       - DOMAINS=vpn.perecollet.dev
