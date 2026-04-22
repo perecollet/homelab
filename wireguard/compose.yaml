@@ -33,7 +33,7 @@ services:
     env_file:
       - ../.env
     environment:
-      - CLOUDFLARE_API_TOKEN=${CF_API_TOKEN}
+      - CLOUDFLARE_API_TOKEN
       - DOMAINS=vpn.perecollet.dev
       - PROXIED=false
       - IP6_PROVIDER=none
