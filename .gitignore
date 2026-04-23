@@ -32,4 +32,6 @@ caddy/data/
 caddy/config/
 
 # --- PORTFOLIO SOURCE (cloned separately) ---
-portfolio/perecolletsite/wireguard/config/
+portfolio/perecolletsite/
+
+wireguard/config/
