@@ -4,7 +4,7 @@ services:
     container_name: caddy
     restart: unless-stopped
     env_file:
-      - ../.env
+      - .env
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
