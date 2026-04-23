@@ -10,22 +10,27 @@ Personal homelab running on a mini PC. All services are containerised with Docke
 | Photos | `photos.perecollet.dev` | Immich — self-hosted photo library |
 | Files | `files.perecollet.dev` | FileBrowser — web file manager |
 | Ads | `ads.perecollet.dev` | AdGuard Home — network-wide ad blocking (LAN only) |
+| VPN | `vpn.perecollet.dev:51820` | WireGuard — remote LAN access via VPN |
 
 ## Architecture
 
 ```
 Internet
    │
-   ▼
-Cloudflare Tunnel (cloudflared)
+   ├── Cloudflare Tunnel (cloudflared)
+   │      │
+   │      ▼
+   │   Caddy :2080 (internal HTTP, no redirect)
+   │      │
+   │      ├── perecollet.dev        → portfolio_site:80
+   │      ├── photos.perecollet.dev → immich_server:2283
+   │      ├── files.perecollet.dev  → filebrowser:80
+   │      └── ads.perecollet.dev    → adguard:80
    │
-   ▼
-Caddy :2080 (internal HTTP, no redirect)
-   │
-   ├── perecollet.dev       → portfolio_site:80  (nginx serving Vite build)
-   ├── photos.perecollet.dev → immich_server:2283
-   ├── files.perecollet.dev  → filebrowser:80
-   └── ads.perecollet.dev    → adguard:80
+   └── WireGuard UDP :51820 (vpn.perecollet.dev)
+          │
+          ▼
+       LAN access (192.168.1.0/24)
 
 Local network
    │
@@ -33,14 +38,25 @@ Local network
 Router DNS → mini PC IP (AdGuard filters all DNS queries)
 ```
 
-All containers share a single internal Docker network (`proxy-nw`). The Cloudflare Tunnel points to `http://caddy:2080` for all subdomains — Caddy routes based on the hostname. Caddy also listens on 443 for direct LAN HTTPS access.
+### Docker networks
+
+| Network | Services | Notes |
+|---|---|---|
+| `proxy-nw` | caddy, cloudflared, adguard, filebrowser, immich-server, portfolio | Main internal highway |
+| `immich-nw` | immich-server, immich-machine-learning, redis, database | Immich internal — `internal: true` |
+| `wireguard-nw` | wireguard | Isolated, UDP 51820 exposed |
+| `ddns-nw` | cloudflare-ddns | Isolated, external DNS only |
+
+The Cloudflare Tunnel points to `http://caddy:2080` for all subdomains — Caddy routes based on hostname. Caddy also listens on 443 for direct LAN HTTPS access. WireGuard gives clients full LAN access without going through the tunnel.
 
 ## Prerequisites
 
 - Docker and Docker Compose v2
 - A Cloudflare account with your domain managed there
-- A Cloudflare API token with `Zone:DNS:Edit` permission
+- A Cloudflare API token with `Zone:DNS:Edit` permission (for Caddy ACME)
+- A separate Cloudflare API token with `Zone:DNS:Edit` permission (for DDNS)
 - A Cloudflare Tunnel token (created via Zero Trust dashboard)
+- Kernel headers installed on the host (required by WireGuard)
 - Tailscale installed on all devices for remote SSH access
 
 ## First-time setup
@@ -71,21 +87,43 @@ cd ..
 
 ### 4. Configure secrets
 
+Each service has its own `.env` file. Copy and fill in each one:
+
 ```bash
-cp .env.example .env
-nano .env
+cp caddy/.env.example caddy/.env
+cp cloudflared/.env.example cloudflared/.env
+cp photos/.env.example photos/.env
+cp wireguard/.env.example wireguard/.env
 ```
+
+**`caddy/.env`**
 
 | Variable | Description |
 |---|---|
-| `DOMAIN` | Your root domain (e.g. `perecollet.dev`) |
-| `CF_TOKEN` | Cloudflare API token (for Caddy DNS challenge) |
-| `CF_TUNNEL_TOKEN` | Cloudflare Tunnel token |
+| `ACME_EMAIL` | Email for Let's Encrypt certificate notifications |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API token with `Zone:DNS:Edit` (for ACME DNS challenge) |
+
+**`cloudflared/.env`**
+
+| Variable | Description |
+|---|---|
+| `CF_TUNNEL_TOKEN` | Cloudflare Tunnel token (from Zero Trust dashboard) |
+
+**`photos/.env`**
+
+| Variable | Description |
+|---|---|
 | `DB_PASSWORD` | Postgres password for Immich |
 | `DB_USERNAME` | Postgres username for Immich |
 | `DB_DATABASE_NAME` | Postgres database name for Immich |
 | `UPLOAD_LOCATION` | Host path for Immich photo uploads (e.g. `/srv/immich/library`) |
 | `DB_DATA_LOCATION` | Host path for Immich Postgres data (e.g. `/srv/immich/postgres`) |
+
+**`wireguard/.env`**
+
+| Variable | Description |
+|---|---|
+| `CLOUDFLARE_DDNS_TOKEN` | Cloudflare API token with `Zone:DNS:Edit` (for DDNS updates) |
 
 ### 5. Create host data directories
 
@@ -101,11 +139,13 @@ sudo mkdir -p \
 sudo chown -R $USER:$USER /srv/files /srv/filebrowser /srv/immich/library
 ```
 
-### 6. Create the Docker network
+### 6. Create the Docker networks
 
 ```bash
 docker network create proxy-nw
 ```
+
+The remaining networks (`immich-nw`, `wireguard-nw`, `ddns-nw`) are created automatically by Docker Compose on first `up`.
 
 ### 7. AdGuard initial setup
 
@@ -129,7 +169,20 @@ In the Cloudflare Zero Trust dashboard, set all hostnames to point to `http://ca
 | `files.perecollet.dev` | `http://caddy:2080` |
 | `ads.perecollet.dev` | `http://caddy:2080` |
 
-### 9. Start everything
+> `vpn.perecollet.dev` is **not** routed through the tunnel — it resolves to the host's public IP via DDNS and WireGuard connects directly over UDP 51820. Make sure your router forwards UDP 51820 to the mini PC.
+
+### 9. Configure WireGuard peers
+
+WireGuard generates peer configs automatically on first start. Retrieve a peer QR code with:
+
+```bash
+docker exec -it wireguard /app/show-peer iphone
+docker exec -it wireguard /app/show-peer mac
+```
+
+Scan the QR code with the WireGuard app on each device. The VPN grants access to `192.168.1.0/24` using AdGuard (`192.168.1.62`) as DNS, so ad blocking applies over VPN too.
+
+### 10. Start everything
 
 ```bash
 docker compose up -d
@@ -163,21 +216,30 @@ docker compose up -d --build portfolio
 ```
 homelab/
 ├── docker-compose.yml       # Root compose — includes all sub-projects
-├── .env                     # Secrets (gitignored)
-├── .env.example             # Template for .env
 ├── caddy/
 │   ├── Caddyfile            # Reverse proxy config (port 2080 internal + 443 LAN)
 │   ├── Dockerfile           # Custom Caddy build with Cloudflare DNS plugin
-│   └── compose.yaml
+│   ├── compose.yaml
+│   ├── .env                 # ACME_EMAIL, CLOUDFLARE_API_TOKEN (gitignored)
+│   └── .env.example
 ├── cloudflared/
-│   └── compose.yaml         # Cloudflare Tunnel
+│   ├── compose.yaml         # Cloudflare Tunnel
+│   ├── .env                 # CF_TUNNEL_TOKEN (gitignored)
+│   └── .env.example
 ├── ads/
 │   └── compose.yaml         # AdGuard Home
 ├── files/
 │   ├── filebrowser.json     # FileBrowser config
 │   └── compose.yaml
 ├── photos/
-│   └── compose.yaml         # Immich (server, ML, redis, postgres)
+│   ├── compose.yaml         # Immich (server, ML, redis, postgres)
+│   ├── .env                 # DB credentials, upload paths (gitignored)
+│   └── .env.example
+├── wireguard/
+│   ├── compose.yaml         # WireGuard VPN + Cloudflare DDNS
+│   ├── config/              # Generated peer configs (gitignored)
+│   ├── .env                 # CLOUDFLARE_DDNS_TOKEN (gitignored)
+│   └── .env.example
 └── portfolio/
     ├── Dockerfile            # Multi-stage Vite build → nginx
     ├── compose.yaml
