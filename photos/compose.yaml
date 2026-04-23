@@ -13,6 +13,7 @@ services:
     restart: unless-stopped
     networks:
       - proxy-nw
+      - immich-nw
 
   immich-machine-learning:
     container_name: immich_machine_learning
@@ -23,14 +24,14 @@ services:
       - ../.env
     restart: unless-stopped
     networks:
-      - proxy-nw
+      - immich-nw
 
   redis:
     container_name: immich_redis
     image: docker.io/valkey/valkey:9@sha256:546304417feac0874c3dd576e0952c6bb8f06bb4093ea0c9ca303c73cf458f63
     restart: unless-stopped
     networks:
-      - proxy-nw
+      - immich-nw
 
   database:
     container_name: immich_postgres
@@ -47,7 +48,7 @@ services:
     shm_size: 128mb
     restart: unless-stopped
     networks:
-      - proxy-nw
+      - immich-nw
 
 volumes:
   immich-model-cache:
@@ -55,3 +56,5 @@ volumes:
 networks:
   proxy-nw:
     external: true
+  immich-nw:
+    internal: true
