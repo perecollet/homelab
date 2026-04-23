@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    dns:
+      - 1.1.1.1
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
