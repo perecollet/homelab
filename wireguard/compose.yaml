@@ -24,6 +24,9 @@ services:
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
     restart: unless-stopped
+    networks:
+      - wireguard-nw
+
   cloudflare-ddns:
     image: favonia/cloudflare-ddns:latest
     container_name: cloudflare-ddns
@@ -35,3 +38,13 @@ services:
       - DOMAINS=vpn.perecollet.dev
       - PROXIED=false
       - IP6_PROVIDER=none
+    networks:
+      - ddns-nw
+
+networks:
+  wireguard-nw:
+    name: wireguard-nw
+    internal: false
+  ddns-nw:
+    name: ddns-nw
+    internal: false
