@@ -7,7 +7,6 @@ services:
     ports:
       - "53:53/tcp"       # DNS
       - "53:53/udp"       # DNS
-      - "8080:80/tcp"     # Admin UI — http://YOUR-SERVER-IP:8080
     volumes:
       - /srv/adguard/work:/opt/adguardhome/work
       - /srv/adguard/conf:/opt/adguardhome/conf
