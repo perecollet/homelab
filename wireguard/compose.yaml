@@ -15,7 +15,7 @@ services:
       - PEERDNS=192.168.1.62
       - INTERNAL_SUBNET=10.13.13.0
       - ALLOWEDIPS=192.168.1.0/24
-      - LOG_CONFS=true
+      - LOG_CONFS=false
     volumes:
       - ./config:/config
       - /lib/modules:/lib/modules:ro
