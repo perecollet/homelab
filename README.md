@@ -24,13 +24,14 @@ Internet
    │      │
    │      ├── perecollet.dev        → portfolio_site:80
    │      ├── photos.perecollet.dev → immich_server:2283
-   │      ├── files.perecollet.dev  → filebrowser:80
-   │      └── ads.perecollet.dev    → adguard:80
+   │      └── files.perecollet.dev  → filebrowser:80
    │
    └── WireGuard UDP :51820 (vpn.perecollet.dev)
           │
           ▼
-       LAN access (192.168.1.0/24)
+       LAN access
+          │
+          └── ads.perecollet.dev    → adguard:80  (VPN only)
 
 Local network
    │
@@ -167,7 +168,6 @@ In the Cloudflare Zero Trust dashboard, set all hostnames to point to `http://ca
 | `perecollet.dev` | `http://caddy:2080` |
 | `photos.perecollet.dev` | `http://caddy:2080` |
 | `files.perecollet.dev` | `http://caddy:2080` |
-| `ads.perecollet.dev` | `http://caddy:2080` |
 
 > `vpn.perecollet.dev` is **not** routed through the tunnel — it resolves to the host's public IP via DDNS and WireGuard connects directly over UDP 51820. Make sure your router forwards UDP 51820 to the mini PC.
 
