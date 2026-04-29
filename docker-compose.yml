@@ -9,6 +9,8 @@ include:
   - path: ./photos/compose.yaml
   - path: ./portfolio/compose.yaml
   - path: ./wireguard/compose.yaml
+  - path: ./n8n/compose.yaml
+  - path: ./jobspy/compose.yaml
 
 networks:
   # This is the "internal highway" for all your apps

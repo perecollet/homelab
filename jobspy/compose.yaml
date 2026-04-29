@@ -1,0 +1,19 @@
+services:
+  jobspy-api:
+    image: rainmanjam/jobspy-api:latest
+    container_name: jobspy-api
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=INFO
+      # Opcional: si JobSpy soporta proxy para evitar bloqueos
+      # - PROXY_URL=
+    networks:
+      - proxy-nw
+    # No expongo puertos al host: solo accesible internamente
+    # Si quieres probar desde tu máquina con curl:
+    # ports:
+    #   - "8001:8000"
+
+networks:
+  proxy-nw:
+    external: true
