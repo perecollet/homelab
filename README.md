@@ -9,6 +9,7 @@ Personal homelab running on a mini PC. All services are containerised with Docke
 | Portfolio | `perecollet.dev` | Personal website (React + Vite) |
 | Photos | `photos.perecollet.dev` | Immich — self-hosted photo library |
 | Files | `files.perecollet.dev` | FileBrowser — web file manager |
+| Automation | `n8n.perecollet.dev` | n8n — self-hosted workflow automation |
 | Ads | `ads.perecollet.dev` | AdGuard Home — network-wide ad blocking (LAN only) |
 | VPN | `vpn.perecollet.dev:51820` | WireGuard — remote LAN access via VPN |
 
@@ -24,7 +25,8 @@ Internet
    │      │
    │      ├── perecollet.dev        → portfolio_site:80
    │      ├── photos.perecollet.dev → immich_server:2283
-   │      └── files.perecollet.dev  → filebrowser:80
+   │      ├── files.perecollet.dev  → filebrowser:80
+   │      └── n8n.perecollet.dev    → n8n:5678
    │
    └── WireGuard UDP :51820 (vpn.perecollet.dev)
           │
@@ -43,7 +45,7 @@ Router DNS → mini PC IP (AdGuard filters all DNS queries)
 
 | Network | Services | Notes |
 |---|---|---|
-| `proxy-nw` | caddy, cloudflared, adguard, filebrowser, immich-server, portfolio | Main internal highway |
+| `proxy-nw` | caddy, cloudflared, adguard, filebrowser, immich-server, portfolio, n8n, n8n-db | Main internal highway |
 | `immich-nw` | immich-server, immich-machine-learning, redis, database | Immich internal — `internal: true` |
 | `wireguard-nw` | wireguard | Isolated, UDP 51820 exposed |
 | `ddns-nw` | cloudflare-ddns | Isolated, external DNS only |
@@ -95,6 +97,7 @@ cp caddy/.env.example caddy/.env
 cp cloudflared/.env.example cloudflared/.env
 cp photos/.env.example photos/.env
 cp wireguard/.env.example wireguard/.env
+cp n8n/.env.example n8n/.env
 ```
 
 **`caddy/.env`**
@@ -126,6 +129,16 @@ cp wireguard/.env.example wireguard/.env
 |---|---|
 | `CLOUDFLARE_DDNS_TOKEN` | Cloudflare API token with `Zone:DNS:Edit` (for DDNS updates) |
 
+**`n8n/.env`**
+
+| Variable | Description |
+|---|---|
+| `N8N_DOMAIN` | Public hostname for n8n (e.g. `n8n.perecollet.dev`) |
+| `N8N_ENCRYPTION_KEY` | Key used to encrypt saved credentials — generate with `openssl rand -hex 32`. **Never change after first run.** |
+| `N8N_DB_USER` | Postgres username for n8n |
+| `N8N_DB_PASSWORD` | Postgres password for n8n |
+| `N8N_DB_NAME` | Postgres database name for n8n |
+
 ### 5. Create host data directories
 
 ```bash
@@ -139,6 +152,8 @@ sudo mkdir -p \
 
 sudo chown -R $USER:$USER /srv/files /srv/filebrowser /srv/immich/library
 ```
+
+n8n stores its data inside the repo directory (bind-mounted at `n8n/data`, `n8n/files`, and `n8n/db-data`) so no extra host directories are needed. Those paths are gitignored.
 
 ### 6. Create the Docker networks
 
@@ -168,6 +183,7 @@ In the Cloudflare Zero Trust dashboard, set all hostnames to point to `http://ca
 | `perecollet.dev` | `http://caddy:2080` |
 | `photos.perecollet.dev` | `http://caddy:2080` |
 | `files.perecollet.dev` | `http://caddy:2080` |
+| `n8n.perecollet.dev` | `http://caddy:2080` |
 
 > `vpn.perecollet.dev` is **not** routed through the tunnel — it resolves to the host's public IP via DDNS and WireGuard connects directly over UDP 51820. Make sure your router forwards UDP 51820 to the mini PC.
 
@@ -240,10 +256,17 @@ homelab/
 │   ├── config/              # Generated peer configs (gitignored)
 │   ├── .env                 # CLOUDFLARE_DDNS_TOKEN (gitignored)
 │   └── .env.example
-└── portfolio/
-    ├── Dockerfile            # Multi-stage Vite build → nginx
-    ├── compose.yaml
-    └── perecolletsite/       # Cloned separately, gitignored
+├── portfolio/
+│   ├── Dockerfile            # Multi-stage Vite build → nginx
+│   ├── compose.yaml
+│   └── perecolletsite/       # Cloned separately, gitignored
+└── n8n/
+    ├── compose.yaml          # n8n + Postgres (n8n-db)
+    ├── .env                  # N8N_DOMAIN, N8N_ENCRYPTION_KEY, DB credentials (gitignored)
+    ├── .env.example
+    ├── data/                 # n8n app data (gitignored)
+    ├── files/                # n8n user files (gitignored)
+    └── db-data/              # Postgres data (gitignored)
 ```
 
 ## FileBrowser default credentials
