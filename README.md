@@ -275,3 +275,7 @@ Username: `admin`
 Password: `admin`
 
 Change these immediately after first login.
+
+## License
+ 
+MIT — see [`LICENSE`](./LICENSE).
