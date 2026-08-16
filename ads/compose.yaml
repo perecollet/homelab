@@ -12,6 +12,26 @@ services:
       - /srv/adguard/conf:/opt/adguardhome/conf
     networks:
       - proxy-nw
+    healthcheck:
+      # AdGuard es imagen scratch: trae nslookup vía busybox, NO dig.
+      test: ["CMD-SHELL", "nslookup -type=a google.com 127.0.0.1 >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    labels:
+      - autoheal=true
+
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: autoheal
+    restart: unless-stopped
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=autoheal
+      - AUTOHEAL_INTERVAL=15
+      - AUTOHEAL_START_PERIOD=60
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 networks:
   proxy-nw:
