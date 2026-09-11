@@ -11,6 +11,7 @@ include:
   - path: ./wireguard/compose.yaml
   - path: ./n8n/compose.yaml
   - path: ./jobspy/compose.yaml
+  - path: ./watchtower/compose.yaml
 
 networks:
   # This is the "internal highway" for all your apps
