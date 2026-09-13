@@ -1,6 +1,7 @@
 # --- PRIVATE SECRETS ---
 .env
 *.env
+.env*
 secrets/
 
 # --- BULK DATA (The "Heavies") ---
@@ -37,3 +38,7 @@ portfolio/perecolletsite/
 wireguard/config/
 
 n8n/db-data/
+
+# Jellyfin runtime data
+jellyfin/config/
+jellyfin/cache/
