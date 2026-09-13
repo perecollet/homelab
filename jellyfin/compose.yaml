@@ -1,0 +1,31 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    user: "1000:1000"           # tu usuario del host
+    group_add:
+      - "${RENDER_GID}"          # GID de render del paso 1
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128   # el nodo clave para VAAPI
+      - /dev/dri/card0:/dev/dri/card0
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - ${MEDIA_PATH}:/media:ro   # solo lectura
+    environment:
+      - JELLYFIN_PublishedServerUrl=https://${JELLYFIN_DOMAIN}
+    networks:
+      - proxy
+    labels:
+      - autoheal=true
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8096/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+networks:
+  proxy:
+    external: true
