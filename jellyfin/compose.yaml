@@ -18,7 +18,7 @@ services:
     environment:
       - JELLYFIN_PublishedServerUrl=https://${JELLYFIN_DOMAIN}
     networks:
-      - proxy
+      - proxy-nw
     labels:
       - autoheal=true
     healthcheck:
@@ -29,5 +29,5 @@ services:
       start_period: 40s
 
 networks:
-  proxy:
+  proxy-nw:
     external: true

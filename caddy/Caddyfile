@@ -57,3 +57,7 @@ n8n.perecollet.dev {
         header_up X-Forwarded-Proto {scheme}
     }
 }
+
+stream.perecollet.dev {
+    reverse_proxy jellyfin:8096
+}
