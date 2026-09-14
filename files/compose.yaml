@@ -7,8 +7,8 @@ services:
     container_name: filebrowser
     restart: unless-stopped
     volumes:
-      - /srv/files:/srv 
-      - /srv/media:/srv/media                       # Host folder exposed in the UI
+      - /srv/files:/srv/files                  # tus archivos de siempre
+      - /srv/media:/srv/media                  # pelis para Jellyfin
       - /srv/filebrowser/database:/database    # DB persisted directly on host
       - ./filebrowser.json:/.filebrowser.json:ro
     networks:
