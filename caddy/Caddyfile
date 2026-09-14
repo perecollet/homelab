@@ -58,6 +58,9 @@ n8n.perecollet.dev {
     }
 }
 
-stream.perecollet.dev {
-    reverse_proxy jellyfin:8096
+files.perecollet.dev {
+    request_body {
+        max_size 50GB
+    }
+    reverse_proxy filebrowser:80
 }
