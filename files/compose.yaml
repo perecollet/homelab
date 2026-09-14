@@ -3,7 +3,7 @@
 # Default login: admin / admin  ← change immediately after first boot!
 services:
   filebrowser:
-    image: filebrowser/filebrowser:latest
+    image: filebrowser/filebrowser:v2.31.2
     container_name: filebrowser
     restart: unless-stopped
     volumes:
