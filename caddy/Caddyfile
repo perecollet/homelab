@@ -41,10 +41,6 @@ photos.perecollet.dev {
     reverse_proxy immich_server:2283
 }
 
-files.perecollet.dev {
-    reverse_proxy filebrowser:80
-}
-
 ads.perecollet.dev {
     reverse_proxy adguard:80
 }
