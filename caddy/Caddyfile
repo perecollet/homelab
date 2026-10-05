@@ -23,10 +23,7 @@
     @n8n host n8n.perecollet.dev
     handle @n8n {
         reverse_proxy n8n:5678 {
-            header_up Host {host}
             header_up X-Real-IP {remote}
-            header_up X-Forwarded-For {remote}
-            header_up X-Forwarded-Proto {scheme}
         }
     }
 }
