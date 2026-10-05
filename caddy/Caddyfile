@@ -57,3 +57,7 @@ files.perecollet.dev {
     }
     reverse_proxy filebrowser:80
 }
+
+stream.perecollet.dev {
+    reverse_proxy jellyfin:8096
+}
